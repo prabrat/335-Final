@@ -9,9 +9,17 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "description": "",
+  "description": "Submitted by:",
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prabrat/335-Final.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prabrat/335-Final/issues"
+  },
+  "homepage": "https://github.com/prabrat/335-Final#readme"
 }
