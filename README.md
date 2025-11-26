@@ -1,6 +1,6 @@
 Submitted by: 
 
-Group Members: Prabhat Jain (pain125), 
+Group Members: Prabhat Jain (pain125), Allison Lee (alee1244)
 
 App Description: 
 
