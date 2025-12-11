@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 
 const MovieSchema = new mongoose.Schema({
-  movieId: String,       // e.g., imdb id
-  title: String,
+  imdbId: String,
+  title: { type: String, required: true },
+  rating: Number,
   genres: [String],
-  rating: Number
-}, { _id: false }); // small subdocs, optional
+  year: Number,
+  runtime: Number
+}, { _id: false });
 
 const PlaylistSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  title: { type: String, required: true },
   movies: { type: [MovieSchema], default: [] },
   createdAt: { type: Date, default: Date.now }
 });
