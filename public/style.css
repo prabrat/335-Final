@@ -1,1 +1,7 @@
-/*choose a font*/
+body{
+    font-family: 'Gloock', sans-serif;
+}
+
+h1{
+    font-family: 'Sancreek', sans-serif;
+}
