@@ -8,13 +8,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // connect to MongoDB
-const mongoUrl = process.env.MONGO_URL || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/playlistsDB';
-mongoose.connect(mongoUrl, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect("mongodb://127.0.0.1:27017/playlistsDB")
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(err => console.error("MongoDB connection error:", err));
 
 // mount playlist routes
 const playlistRoutes = require('./routes/playlist');
