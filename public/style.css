@@ -8,6 +8,15 @@ body{
     text-align: center;
 }
 
+.outer {
+    border: 2px solid #f0e2cf;
+}
+
+.inner {
+    border: 8px solid #463932;
+    border-style: double;
+}
+
 h1{
     font-family: 'Sancreek', sans-serif;
     color: black;
@@ -29,4 +38,3 @@ button {
     padding: 5px 10px;
     border-radius: 10px;
 }
-
