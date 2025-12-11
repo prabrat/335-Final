@@ -15,186 +15,190 @@
     <link href="https://fonts.googleapis.com/css2?family=Gloock&display=swap" rel="stylesheet">
 </head>
 <body>
-    <form onsubmit="event.preventDefault(); search();">
-        <h1>Create a Movie Playlist</h1>
-        <input type="text" id="title" placeholder="Movie Title">
-        <input type="text" id="genre" placeholder="Genre">
-        <input type="number" id="rating" placeholder="Minimum Rating" min="0" max="10" step="0.1">
-        <button type="submit">Search</button>
-    </form>
+  <div class = "outer">
+    <div class = "inner">
+      <form onsubmit="event.preventDefault(); search();">
+          <h1>Create a Movie Playlist</h1>
+          <input type="text" id="title" placeholder="Movie Title">
+          <input type="text" id="genre" placeholder="Genre">
+          <input type="number" id="rating" placeholder="Minimum Rating" min="0" max="10" step="0.1">
+          <button type="submit">Search</button>
+      </form>
+      
+      <section>
+          <h2>Current Playlist</h2>
+          <input id="playlist-title" placeholder="Playlist title" />
+          <div id="playlist" class="playlist"></div>
+          <button id="save-playlist">Save Playlist</button>
+      </section>
+
+      <section>
+          <h2>Saved Playlists</h2>
+          <div id="saved-playlists"></div>
+      </section>
+
+      <section>
+          <h2>Search Results</h2>
+          <div id="results" class="results"></div>
+      </section>
+
     
-    <section>
-        <h2>Current Playlist</h2>
-        <input id="playlist-title" placeholder="Playlist title" />
-        <div id="playlist" class="playlist"></div>
-        <button id="save-playlist">Save Playlist</button>
-    </section>
+      <script>
+      let currentPlaylist = { title: 'New Playlist', movies: [] };
+      let lastSearchResults = [];
 
-    <section>
-        <h2>Saved Playlists</h2>
-        <div id="saved-playlists"></div>
-    </section>
+      async function search() {
+        const title = document.getElementById('title').value;
+        const genre = document.getElementById('genre').value;
+        const rating = document.getElementById('rating').value;
 
-    <section>
-        <h2>Search Results</h2>
-        <div id="results" class="results"></div>
-    </section>
+        const query = new URLSearchParams();
+        if (title) query.append("title", title);
+        if (genre) query.append("genre", genre);
+        if (rating) query.append("minRating", rating);
 
-    
-<script>
-let currentPlaylist = { title: 'New Playlist', movies: [] };
-let lastSearchResults = [];
+        try {
+          const res = await fetch("/api/search?" + query.toString());
+          if (!res.ok) throw new Error(res.status);
+          const data = await res.json();
+          lastSearchResults = Array.isArray(data) ? data : [];
+          displayMovies(lastSearchResults);
+        } catch (err) {
+          document.getElementById('results').innerHTML = '<p>Error searching.</p>';
+        }
+      }
 
-async function search() {
-  const title = document.getElementById('title').value;
-  const genre = document.getElementById('genre').value;
-  const rating = document.getElementById('rating').value;
+      function displayMovies(movies) {
+        const container = document.getElementById('results');
+        container.innerHTML = "";
+        if (!movies.length) { container.innerHTML = '<p>No results.</p>'; return; }
 
-  const query = new URLSearchParams();
-  if (title) query.append("title", title);
-  if (genre) query.append("genre", genre);
-  if (rating) query.append("minRating", rating);
+        movies.forEach((movie, idx) => {
+          const div = document.createElement('div');
+          div.className = "movie-card";
 
-  try {
-    const res = await fetch("/api/search?" + query.toString());
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    lastSearchResults = Array.isArray(data) ? data : [];
-    displayMovies(lastSearchResults);
-  } catch (err) {
-    document.getElementById('results').innerHTML = '<p>Error searching.</p>';
-  }
-}
+          const title = document.createElement('h3');
+          title.textContent = movie.primaryTitle || movie.title || 'Untitled';
+          div.appendChild(title);
 
-function displayMovies(movies) {
-  const container = document.getElementById('results');
-  container.innerHTML = "";
-  if (!movies.length) { container.innerHTML = '<p>No results.</p>'; return; }
+          const genres = document.createElement('p');
+          genres.textContent = 'Genres: ' + (Array.isArray(movie.genres) ? movie.genres.join(', ') : (movie.genres || 'N/A'));
+          div.appendChild(genres);
 
-  movies.forEach((movie, idx) => {
-    const div = document.createElement('div');
-    div.className = "movie-card";
+          const rating = document.createElement('p');
+          rating.textContent = 'Rating: ' + (movie.averageRating ?? 'N/A');
+          div.appendChild(rating);
 
-    const title = document.createElement('h3');
-    title.textContent = movie.primaryTitle || movie.title || 'Untitled';
-    div.appendChild(title);
+          const btn = document.createElement('button');
+          btn.textContent = 'Add to Playlist';
+          btn.addEventListener('click', () => addToPlaylist(movie));
+          div.appendChild(btn);
 
-    const genres = document.createElement('p');
-    genres.textContent = 'Genres: ' + (Array.isArray(movie.genres) ? movie.genres.join(', ') : (movie.genres || 'N/A'));
-    div.appendChild(genres);
+          container.appendChild(div);
+        });
+      }
 
-    const rating = document.createElement('p');
-    rating.textContent = 'Rating: ' + (movie.averageRating ?? 'N/A');
-    div.appendChild(rating);
+      function addToPlaylist(movie) {
+        const entry = {
+          imdbId: movie.id || movie.tconst || null,
+          title: movie.primaryTitle || movie.title || 'Untitled',
+          rating: movie.averageRating ?? null,
+          genres: Array.isArray(movie.genres) ? movie.genres : (movie.genres ? movie.genres.split(',') : []),
+          year: movie.startYear ?? null,
+          runtime: movie.runtimeMinutes ?? null
+        };
+        // avoid duplicates by imdbId/title
+        if (!currentPlaylist.movies.some(m => (m.imdbId && m.imdbId === entry.imdbId) || m.title === entry.title)) {
+          currentPlaylist.movies.push(entry);
+          renderPlaylist();
+        } else {
+          alert('Movie already in playlist');
+        }
+      }
 
-    const btn = document.createElement('button');
-    btn.textContent = 'Add to Playlist';
-    btn.addEventListener('click', () => addToPlaylist(movie));
-    div.appendChild(btn);
+      function removeFromPlaylist(index) {
+        currentPlaylist.movies.splice(index, 1);
+        renderPlaylist();
+      }
 
-    container.appendChild(div);
-  });
-}
+      function renderPlaylist() {
+        const el = document.getElementById('playlist');
+        const titleInput = document.getElementById('playlist-title');
+        titleInput.value = currentPlaylist.title || '';
+        if (!currentPlaylist.movies.length) {
+          el.innerHTML = '<p>No movies in playlist.</p>';
+          return;
+        }
+        el.innerHTML = currentPlaylist.movies.map((m, i) =>
+          `<div class="pl-item"><strong>${i+1}. ${escapeHtml(m.title)}</strong> — ${escapeHtml(m.genres.join(', ') || 'N/A')} (${m.rating ?? 'N/A'})
+            <button data-idx="${i}" class="remove-btn">Remove</button>
+          </div>`
+        ).join('');
+        // hook remove buttons
+        Array.from(el.querySelectorAll('.remove-btn')).forEach(b => {
+          b.addEventListener('click', (e) => {
+            const idx = Number(e.currentTarget.dataset.idx);
+            removeFromPlaylist(idx);
+          });
+        });
+      }
 
-function addToPlaylist(movie) {
-  const entry = {
-    imdbId: movie.id || movie.tconst || null,
-    title: movie.primaryTitle || movie.title || 'Untitled',
-    rating: movie.averageRating ?? null,
-    genres: Array.isArray(movie.genres) ? movie.genres : (movie.genres ? movie.genres.split(',') : []),
-    year: movie.startYear ?? null,
-    runtime: movie.runtimeMinutes ?? null
-  };
-  // avoid duplicates by imdbId/title
-  if (!currentPlaylist.movies.some(m => (m.imdbId && m.imdbId === entry.imdbId) || m.title === entry.title)) {
-    currentPlaylist.movies.push(entry);
-    renderPlaylist();
-  } else {
-    alert('Movie already in playlist');
-  }
-}
+      document.getElementById('save-playlist').addEventListener('click', savePlaylist);
 
-function removeFromPlaylist(index) {
-  currentPlaylist.movies.splice(index, 1);
-  renderPlaylist();
-}
+      async function savePlaylist() {
+        const titleInput = document.getElementById('playlist-title').value.trim();
+        if (!titleInput) return alert('Please enter a playlist title before saving.');
+        if (!currentPlaylist.movies.length) return alert('Playlist is empty.');
 
-function renderPlaylist() {
-  const el = document.getElementById('playlist');
-  const titleInput = document.getElementById('playlist-title');
-  titleInput.value = currentPlaylist.title || '';
-  if (!currentPlaylist.movies.length) {
-    el.innerHTML = '<p>No movies in playlist.</p>';
-    return;
-  }
-  el.innerHTML = currentPlaylist.movies.map((m, i) =>
-    `<div class="pl-item"><strong>${i+1}. ${escapeHtml(m.title)}</strong> — ${escapeHtml(m.genres.join(', ') || 'N/A')} (${m.rating ?? 'N/A'})
-      <button data-idx="${i}" class="remove-btn">Remove</button>
-    </div>`
-  ).join('');
-  // hook remove buttons
-  Array.from(el.querySelectorAll('.remove-btn')).forEach(b => {
-    b.addEventListener('click', (e) => {
-      const idx = Number(e.currentTarget.dataset.idx);
-      removeFromPlaylist(idx);
-    });
-  });
-}
+        const payload = { title: titleInput, movies: currentPlaylist.movies };
+        try {
+          const res = await fetch('/api/playlists', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error('Save failed: ' + res.status);
+          const saved = await res.json();
+          alert('Playlist saved: ' + (saved._id || 'unknown id'));
+          // reset current playlist and refresh saved playlists
+          currentPlaylist = { title: 'New Playlist', movies: [] };
+          document.getElementById('playlist-title').value = '';
+          renderPlaylist();
+          await loadSavedPlaylists();
+        } catch (err) {
+          alert('Error saving playlist: ' + err.message);
+        }
+      }
 
-document.getElementById('save-playlist').addEventListener('click', savePlaylist);
+      async function loadSavedPlaylists() {
+        try {
+          const res = await fetch('/api/playlists');
+          if (!res.ok) throw new Error(res.status);
+          const list = await res.json();
+          renderSavedPlaylists(list);
+        } catch (err) {
+          document.getElementById('saved-playlists').innerHTML = '<p>Error loading playlists.</p>';
+        }
+      }
 
-async function savePlaylist() {
-  const titleInput = document.getElementById('playlist-title').value.trim();
-  if (!titleInput) return alert('Please enter a playlist title before saving.');
-  if (!currentPlaylist.movies.length) return alert('Playlist is empty.');
+      function renderSavedPlaylists(list) {
+        const el = document.getElementById('saved-playlists');
+        if (!list || !list.length) { el.innerHTML = '<p>No saved playlists.</p>'; return; }
+        el.innerHTML = list.map(p => {
+          const moviesSummary = (p.movies || []).map(m => escapeHtml(m.title)).join(', ');
+          return `<div class="saved-pl"><strong>${escapeHtml(p.title)}</strong> — ${new Date(p.createdAt).toLocaleString()}<div>${moviesSummary}</div></div>`;
+        }).join('');
+      }
 
-  const payload = { title: titleInput, movies: currentPlaylist.movies };
-  try {
-    const res = await fetch('/api/playlists', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error('Save failed: ' + res.status);
-    const saved = await res.json();
-    alert('Playlist saved: ' + (saved._id || 'unknown id'));
-    // reset current playlist and refresh saved playlists
-    currentPlaylist = { title: 'New Playlist', movies: [] };
-    document.getElementById('playlist-title').value = '';
-    renderPlaylist();
-    await loadSavedPlaylists();
-  } catch (err) {
-    alert('Error saving playlist: ' + err.message);
-  }
-}
+      function escapeHtml(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
 
-async function loadSavedPlaylists() {
-  try {
-    const res = await fetch('/api/playlists');
-    if (!res.ok) throw new Error(res.status);
-    const list = await res.json();
-    renderSavedPlaylists(list);
-  } catch (err) {
-    document.getElementById('saved-playlists').innerHTML = '<p>Error loading playlists.</p>';
-  }
-}
-
-function renderSavedPlaylists(list) {
-  const el = document.getElementById('saved-playlists');
-  if (!list || !list.length) { el.innerHTML = '<p>No saved playlists.</p>'; return; }
-  el.innerHTML = list.map(p => {
-    const moviesSummary = (p.movies || []).map(m => escapeHtml(m.title)).join(', ');
-    return `<div class="saved-pl"><strong>${escapeHtml(p.title)}</strong> — ${new Date(p.createdAt).toLocaleString()}<div>${moviesSummary}</div></div>`;
-  }).join('');
-}
-
-function escapeHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-// initial render
-renderPlaylist();
-loadSavedPlaylists();
-</script>
+      // initial render
+      renderPlaylist();
+      loadSavedPlaylists();
+      </script>
+    </div>
+  </div>
 </body>
 </html>
