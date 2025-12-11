@@ -1,7 +1,7 @@
 // routes/playlist.js
 const express = require('express');
 const router = express.Router();
-const Playlist = require('../models/playlist');
+const Playlist = require('../model/playlist');
 
 // Get all playlists
 router.get('/', async (req, res) => {

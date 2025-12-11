@@ -12,12 +12,7 @@
         <input type="number" id="rating" placeholder="Minimum Rating" min="0" max="10" step="0.1">
         <button type="submit">Search</button>
     </form>
-
-    <section>
-        <h2>Search Results</h2>
-        <div id="results" class="results"></div>
-    </section>
-
+    
     <section>
         <h2>Current Playlist</h2>
         <input id="playlist-title" placeholder="Playlist title" />
@@ -30,6 +25,12 @@
         <div id="saved-playlists"></div>
     </section>
 
+    <section>
+        <h2>Search Results</h2>
+        <div id="results" class="results"></div>
+    </section>
+
+    
 <script>
 let currentPlaylist = { title: 'New Playlist', movies: [] };
 let lastSearchResults = [];
