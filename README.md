@@ -1,13 +1,13 @@
-Submitted by: 
+Submitted by:
 
-Group Members: Prabhat Jain (pain125), Allison Lee (alee1244)
+Group Members: Prabhat Jain (pain125), Allison Lee (alee1244), Nick Yuan (nyuan), Juno Song (jsong04)
 
-App Description: 
+App Description:
 
-YouTube Video Link: 
+YouTube Video Link:
 
-APIs: IMDb from Rapid 
+APIs: IMDb from Rapid
 
-Contact Email:  
+Contact Email:
 
-Deployed App Link: 
+Deployed App Link:
